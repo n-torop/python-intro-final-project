@@ -39,4 +39,4 @@ Option 1: Input a region (Europe, Asia, etc.). The program fetches all countries
 
 Option 2: Prompts for a region and then shows a menu of international organizations. Input numbers separated by spaces. THe program matches the countries that are members and prints their names.
 
-OPtion 3: Quit
+Option 3: Quit
