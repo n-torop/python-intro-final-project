@@ -1,42 +1,42 @@
-# [Project Title]
+Country Explorer (by Region)
 
-A brief one- or two-sentence description of what this program does.
+A command-line tool for exploring countries by region. Fetch country data from the REST Countries API, view general information (description, population, government structure), and filter countries by international memberships (EU, NATO, etc.)
 
-## API
+_ _ _ _ _ _ _
 
-This project uses the [API Name](https://api-url-here.com) API.
+API used: "https://api.restcountries.com/countries/v5"
 
-## Installation
+API key: required, free to obtain on the website: https://restcountries.com/docs/countries
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/your-username/python-intro-final-project.git
-   cd python-intro-final-project
-   ```
+Key handling: stored in .env file, read via "COUNTRY_API_KEY" environment variable
 
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate      # macOS/Linux
-   # .venv\Scripts\activate       # Windows
-   ```
+The project requires installation of your own .env file
+_ _ _ _ _ _ _
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+Requirements
 
-## Usage
+Required: Python Python 3.14.6 or greater installed. 
 
-```bash
-python main.py
-```
+Dependencies: install with pip install -r requirements.txt
 
-Describe what happens when the program runs — what prompt(s) appear and what the user can do.
+Required: 
+python-dotenv==1.2.3
+requests==2.34.2
 
-## CLI Interactions
+_ _ _ _ _ _ _
 
-Describe each interaction your CLI supports. For example:
+How To Run: python project.py
 
-- **Filter by region** — enter a region name to see all matching records
-- **Look up by name** — enter a name to see details for one specific record
+The program presents a looping menu:
+=== Country Explorer (by Region) ===
+1. Get general country information
+2. Filter by membership
+3. Quit
+
+Choose an option (1-3)
+
+Option 1: Input a region (Europe, Asia, etc.). The program fetches all countries and prints: country name, short description, population, government type
+
+Option 2: Prompts for a region and then shows a menu of international organizations. Input numbers separated by spaces. THe program matches the countries that are members and prints their names.
+
+OPtion 3: Quit
