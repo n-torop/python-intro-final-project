@@ -25,7 +25,7 @@ requests==2.34.2
 
 _ _ _ _ _ _ _
 
-How To Run: python project.py
+How To Run: python main.py
 
 The program presents a looping menu:
 === Country Explorer (by Region) ===
