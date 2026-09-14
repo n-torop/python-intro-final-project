@@ -1,4 +1,4 @@
-
+import matplotlib.pyplot as plt
 import requests
 import os
 from dotenv import load_dotenv
@@ -7,24 +7,30 @@ import json
 def get_region_user():
     return input("Enter region: ").strip().lower()
 
-def fetch_data(region): 
-    load_dotenv()
-    api_key=os.getenv("COUNTRY_API_KEY")
-    params ={
-        "region": region
-    }
-    base_url= "https://api.restcountries.com/countries/v5"
-    headers={"Authorization": f"Bearer {api_key}"}
+# def fetch_data(region): 
+#     load_dotenv()
+#     api_key=os.getenv("COUNTRY_API_KEY")
+#     params ={
+#         "region": region
+#     }
+#     base_url= "https://api.restcountries.com/countries/v5"
+#     headers={"Authorization": f"Bearer {api_key}"}
     
-    try: 
-        response = requests.get(base_url, headers=headers, params=params)
-        status=response.raise_for_status()
-        data=response.json()
-        return data
-    except requests.exceptions.HTTPError:
-        print (f'HTTP error occured')
-    except requests.exceptions.RequestException as e:
-            print ("Error: Could not reach the server. Check your connection and try again.")
+#     try: 
+#         response = requests.get(base_url, headers=headers, params=params)
+#         status=response.raise_for_status()
+#         data=response.json()
+#         return data
+#     except requests.exceptions.HTTPError:
+#         print (f'HTTP error occured')
+#     except requests.exceptions.RequestException as e:
+#             print ("Error: Could not reach the server. Check your connection and try again.")
+
+
+
+with open ("countries.json", "r") as f:
+    data_json=json.load(f)
+
 
 def process_data(data):
     countries=data["data"]["objects"]
@@ -48,19 +54,20 @@ def process_data(data):
         date=el.get("date", {}).get("start_of_week", {})
         description=el.get ("descriptions", {}).get("short", {})
         government=el.get("government_type", {})
-        languages=el.get("languages", {})
-        if languages and isinstance (languages, list) and len(languages)>0:
-            language=languages[0].get("name", {})
-            lang_list=[]
-            for lang in languages:
-                name_lang=lang.get("name", "Unknown")
-                lang_list.append(name_lang)
+        languages=el.get("languages", [])
+        lang_list=[]
+
+        # if languages and isinstance (languages, list) and len(languages)>0:
+        #     language=languages[0].get("name", {})
+        #     lang_list=[]
+        for lang in languages:
+            name_lang=lang.get("name", "Unknown")
+            lang_list.append(name_lang)
         timezone=el.get("timezones", {})
         all_memberships=el.get("memberships", {})
         selected_membership=[k for k, v in all_memberships.items() if v==True]
         if not selected_membership:
             selected_membership=["No memberships found"]
-
         parsed_data.append({
             "name_common": name_common, 
             "name_official": name_official, 
@@ -154,6 +161,39 @@ def search_description(list_info):
     return filtered_countries
    
 
+def pre_visualization(list_info):
+    print ("Compare population sizes of chosen countries")
+    user_pick1=input("Pick country N.1 to compare: ").lower()
+    user_pick2=input("Pick country N.2 to compare: ").lower()
+    user_pick3=input("Pick country N.3 to compare: ").lower()
+    for el in list_info:
+        selected_country=el.get("country_name", '')
+        selected_population=el.get("population", '')
+
+
+
+
+
+
+
+
+def visualization(filtered_countries):
+    labels=[r["name_common"] for r in filtered_countries]
+    values=[r["population"] for r in filtered_countries]
+# labels = ["Country A", "COuntry B", "Category C", "Category D"]
+# values = [42, 78, 31, 188]
+
+    plt.bar(labels, values)
+    plt.xlabel("Countries")
+    plt.ylabel("Population")
+    plt.title("Population Comparison ny Country")
+    plt.tight_layout()
+    # plt.savefig("sample_chart.png")
+    plt.show()
+
+
+
+
 def main():
     while True:
         print ("\n=== Country Explorer (by Region) ===\n1. Get general country information\n2. Filter by membership\n3. Quit\n")
@@ -173,8 +213,16 @@ def main():
             continue
 
         user_region=get_region_user()
-        data=fetch_data(user_region) 
-        new_l=process_data(data)
+
+        # data=fetch_data(user_region) 
+        # new_l=process_data(data)
+
+        new_l=process_data(data_json) ##remove this
+
+
+        pre_visualization(new_l)
+        visualization(new_l)
+
         
         if user_input==1:
             description_res=search_description(new_l)
