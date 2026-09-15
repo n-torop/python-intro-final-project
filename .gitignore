@@ -15,6 +15,7 @@ cat > .gitignore <<'EOF'
 !main.py
 !README.md
 !requirements.txt
+!countries_chart.png
 
 # Allow this .gitignore
 !.gitignore

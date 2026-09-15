@@ -7,29 +7,31 @@ import json
 def get_region_user():
     return input("Enter region: ").strip().lower()
 
-# def fetch_data(region): 
-#     load_dotenv()
-#     api_key=os.getenv("COUNTRY_API_KEY")
-#     params ={
-#         "region": region
-#     }
-#     base_url= "https://api.restcountries.com/countries/v5"
-#     headers={"Authorization": f"Bearer {api_key}"}
+def fetch_data(region): 
+    load_dotenv()
+    api_key=os.getenv("COUNTRY_API_KEY")
+    params ={
+        "region": region
+    }
+    base_url= "https://api.restcountries.com/countries/v5"
+    headers={"Authorization": f"Bearer {api_key}"}
     
-#     try: 
-#         response = requests.get(base_url, headers=headers, params=params)
-#         status=response.raise_for_status()
-#         data=response.json()
-#         return data
-#     except requests.exceptions.HTTPError:
-#         print (f'HTTP error occured')
-#     except requests.exceptions.RequestException as e:
-#             print ("Error: Could not reach the server. Check your connection and try again.")
+    try: 
+        response = requests.get(base_url, headers=headers, params=params)
+        status=response.raise_for_status()
+        data=response.json()
+        return data
+    except requests.exceptions.HTTPError:
+        print (f'HTTP error occured')
+        return None
+    except requests.exceptions.RequestException as e:
+        print ("Error: Could not reach the server. Check your connection and try again.")
+        return None
 
 
 
-with open ("countries.json", "r") as f:
-    data_json=json.load(f)
+# with open ("countries.json", "r") as f:
+#     data_json=json.load(f)
 
 
 def process_data(data):
@@ -44,27 +46,22 @@ def process_data(data):
             capital=capitals[0].get("name", "Unknown")
         else: 
             capital="Unknown"
-        population=el.get('population', {})
-        cars=el.get("cars", {}).get("driving_side", {})
-        currencies=el.get("currency", [])
+        population=el.get('population', 0)
+        cars=el.get("cars", {}).get("driving_side", "Unknown")
+        currencies=el.get("currencies", [])
         if currencies and isinstance (currencies, list) and len(currencies)>0:
             currency=currencies[0].get("name", {})
         else:
             currency="N/A"
-        date=el.get("date", {}).get("start_of_week", {})
-        description=el.get ("descriptions", {}).get("short", {})
-        government=el.get("government_type", {})
+        date=el.get("date", {}).get("start_of_week", "Unknown")
+        description=el.get ("descriptions", {}).get("short", "N/A")
+        government=el.get("government_type", "Unknown")
         languages=el.get("languages", [])
         lang_list=[]
-
-        # if languages and isinstance (languages, list) and len(languages)>0:
-        #     language=languages[0].get("name", {})
-        #     lang_list=[]
         for lang in languages:
             name_lang=lang.get("name", "Unknown")
             lang_list.append(name_lang)
-        
-        timezone=el.get("timezones", {})
+        timezone=el.get("timezones", [])
         all_memberships=el.get("memberships", {})
         selected_membership=[k for k, v in all_memberships.items() if v==True]
         if not selected_membership:
@@ -186,8 +183,9 @@ def choose_visualization(list_info):
             continue
 
         if choice==4:
-            print ("Exciting!")
-            break
+            print ("Exiting!")
+            return None
+
         if choice not in (1, 2, 3):
             print ("Invalid input. Please enter 1, 2, 3 or 4.")
             continue
@@ -215,15 +213,12 @@ def choose_visualization(list_info):
 def pre_visualization(list_info, metric):
     print ("\nCompare data for chosen countries")
     user_choice_list=[]
-    user_pick=input("Pick 4 countries to compare: ").lower()
+    user_pick=input("Pick 2-6 countries to compare: ").lower()
     print ("Compiling chart...")
     user_choice_list=user_pick.split(",")
     cleaned_choices=[]
     for country in user_choice_list:
         cleaned_choices.append(country.strip())
-
-# Jordan, Japan, Cambodia, Armenia
-# Kyrgyzstan, Laos, Lebanon, Macau
     selected=[]
     for el in list_info:
         selected_country=el.get("name_common", '').lower()
@@ -248,7 +243,7 @@ def visualization(vis_data, metric):
     plt.ylabel(metric["ylabel"])
     plt.title(metric["title"])
     plt.tight_layout()
-    # plt.savefig("sample_chart.png")
+    plt.savefig("countries_chart.png")
     plt.show()
 
 
@@ -272,10 +267,8 @@ def main():
 
         user_region=get_region_user()
 
-        # data=fetch_data(user_region) 
-        # new_l=process_data(data)
-
-        new_l=process_data(data_json) ##remove this
+        data=fetch_data(user_region) 
+        new_l=process_data(data)
 
         if user_input==1:
             description_res=search_description(new_l)
@@ -283,6 +276,8 @@ def main():
             membership_results=filter_by_membership(new_l)
         elif user_input==3:
             metric=choose_visualization(new_l)
+            if metric is None:
+                continue
             country_prepare=pre_visualization(new_l, metric)
             visualization(country_prepare, metric)
 
