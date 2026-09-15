@@ -63,11 +63,17 @@ def process_data(data):
         for lang in languages:
             name_lang=lang.get("name", "Unknown")
             lang_list.append(name_lang)
+        
         timezone=el.get("timezones", {})
         all_memberships=el.get("memberships", {})
         selected_membership=[k for k, v in all_memberships.items() if v==True]
         if not selected_membership:
             selected_membership=["No memberships found"]
+        area_km=el.get("area", {}).get("kilometers", 0)
+        if area_km>0 and population>0:
+            population_density=population/area_km
+        else: 
+            population_density=0
         parsed_data.append({
             "name_common": name_common, 
             "name_official": name_official, 
@@ -81,7 +87,9 @@ def process_data(data):
             "languages": lang_list, 
             "timezone": timezone, 
             "all_memberships": all_memberships, 
-            "selected_membership": selected_membership
+            "selected_membership": selected_membership,
+            "area_km": area_km, 
+            "population_density": population_density
         })
     return parsed_data
 
@@ -160,15 +168,66 @@ def search_description(list_info):
         print (f"Country: {selected_country}\nDescription: {selected_description} | Population: {selected_population} | Government: {selected_governement}\n")
     return filtered_countries
    
+def choose_visualization():
+    print("What would you like to compare?")
+    print ("1. Population\n2. Area\n3. Population density")
+    while True:
+        choice=input("Choose an option (1-3): ").strip()
+        if choice=="1":
+            return {
+                "key": "population",
+                "ylabel": "Population (millions)",
+                "title": "Population Comparison by Country"
+            }
+        
+        elif choice=="2":
+            return {
+                "key": "area",
+                "ylabel": "Area (in km²)",
+                "title": "Area Comparison by Country"
+            }
+        elif choice=="3":
+            return {
+                "key": "density",
+                "ylabel": "Population Density (people per km²)",
+                "title": "Population Density Comparison by Country"
+            }
+        else:
+            print ("Invalid choice. PLease enter 1, 2, or 3")
 
-def pre_visualization(list_info):
-    print ("Compare population sizes of chosen countries")
-    user_pick1=input("Pick country N.1 to compare: ").lower()
-    user_pick2=input("Pick country N.2 to compare: ").lower()
-    user_pick3=input("Pick country N.3 to compare: ").lower()
+
+def pre_visualization(list_info, metric):
+    print ("Compare data for chosen countries")
+    user_choice_list=[]
+    user_pick=input("Pick 4 countries to compare: ").lower()
+    user_choice_list=user_pick.split(",")
+    cleaned_choices=[]
+    for country in user_choice_list:
+        cleaned_choices.append(country.strip())
+#Jordan, Japan, Cambodia, Armenia
+    # print ("user_choice_list\n\n", user_choice_list)
+   
+    selected=[]
     for el in list_info:
-        selected_country=el.get("country_name", '')
-        selected_population=el.get("population", '')
+        selected_country=el.get("name_common", '').lower()
+        if selected_country in cleaned_choices:
+            selected.append(el)
+    flattened_list=[]
+    for el in selected: 
+        country_name=el.get("name_common", '')
+        population=round(el.get("population", 0), 2)
+        area=el.get("area_km", 0)
+        density=round(el.get("population_density", 0), 2)
+
+        flattened_list.append({
+            "name_common": country_name, 
+            "population": population, 
+            "area": area, 
+            "density": density
+        })
+    print ("flattened\n\n", flattened_list)
+    return flattened_list
+    
 
 
 
@@ -177,16 +236,17 @@ def pre_visualization(list_info):
 
 
 
-def visualization(filtered_countries):
-    labels=[r["name_common"] for r in filtered_countries]
-    values=[r["population"] for r in filtered_countries]
-# labels = ["Country A", "COuntry B", "Category C", "Category D"]
+
+def visualization(vis_data):
+    labels=[r["name_common"] for r in vis_data]
+    values=[r["population"] for r in vis_data]
+# labels = ["Country A", "Country B", "Category C", "Category D"]
 # values = [42, 78, 31, 188]
 
     plt.bar(labels, values)
     plt.xlabel("Countries")
     plt.ylabel("Population")
-    plt.title("Population Comparison ny Country")
+    plt.title("Population Comparison by Country")
     plt.tight_layout()
     # plt.savefig("sample_chart.png")
     plt.show()
@@ -219,9 +279,11 @@ def main():
 
         new_l=process_data(data_json) ##remove this
 
-
-        pre_visualization(new_l)
-        visualization(new_l)
+        country_prepare=pre_visualization(new_l)
+        metric=choose_visualization()
+        print(metric)
+        # print(country_prepare)
+        # visualization(country_prepare)
 
         
         if user_input==1:
