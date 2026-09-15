@@ -168,36 +168,52 @@ def search_description(list_info):
         print (f"Country: {selected_country}\nDescription: {selected_description} | Population: {selected_population} | Government: {selected_governement}\n")
     return filtered_countries
    
-def choose_visualization():
-    print("What would you like to compare?")
-    print ("1. Population\n2. Area\n3. Population density")
+def choose_visualization(list_info):
+    print ("\nCountries available for comparison: ")
+    for el in list_info:
+        country_name=el.get("name_common", '')
+        print(country_name)
+   
+    print("\nWhat would you like to compare?")
+    print ("1. Population\n2. Area\n3. Population density\n4. Go back")
     while True:
-        choice=input("Choose an option (1-3): ").strip()
-        if choice=="1":
+        
+        raw=input ("Choose an option (1-4): ").strip()
+        try:
+            choice=int(raw)
+        except ValueError:
+            print (f'"{raw}" is not a valid number.')
+            continue
+
+        if choice==4:
+            print ("Exciting!")
+            break
+        if choice not in (1, 2, 3):
+            print ("Invalid input. Please enter 1, 2, 3 or 4.")
+            continue
+
+        if choice==1:
             return {
                 "key": "population",
                 "ylabel": "Population (millions)",
                 "title": "Population Comparison by Country"
             }
-        
-        elif choice=="2":
+        elif choice==2:
             return {
                 "key": "area_km",
                 "ylabel": "Area (in km²)",
                 "title": "Area Comparison by Country"
             }
-        elif choice=="3":
+        elif choice==3:
             return {
                 "key": "population_density",
                 "ylabel": "Population Density (people per km²)",
                 "title": "Population Density Comparison by Country"
             }
-        else:
-            print ("Invalid choice. PLease enter 1, 2, or 3")
-
+       
 
 def pre_visualization(list_info, metric):
-    print ("Compare data for chosen countries")
+    print ("\nCompare data for chosen countries")
     user_choice_list=[]
     user_pick=input("Pick 4 countries to compare: ").lower()
     print ("Compiling chart...")
@@ -205,9 +221,9 @@ def pre_visualization(list_info, metric):
     cleaned_choices=[]
     for country in user_choice_list:
         cleaned_choices.append(country.strip())
-#Jordan, Japan, Cambodia, Armenia
-    # print ("user_choice_list\n\n", user_choice_list)
-   
+
+# Jordan, Japan, Cambodia, Armenia
+# Kyrgyzstan, Laos, Lebanon, Macau
     selected=[]
     for el in list_info:
         selected_country=el.get("name_common", '').lower()
@@ -221,18 +237,8 @@ def pre_visualization(list_info, metric):
             "name_common": country_name, 
             "value": parameter 
         })
-    
-    # print ("flattened\n\n", flattened_list)
     return flattened_list
     
-
-
-
-
-
-
-
-
 
 def visualization(vis_data, metric):
     labels=[r["name_common"] for r in vis_data]
@@ -244,8 +250,6 @@ def visualization(vis_data, metric):
     plt.tight_layout()
     # plt.savefig("sample_chart.png")
     plt.show()
-
-
 
 
 def main():
@@ -273,14 +277,12 @@ def main():
 
         new_l=process_data(data_json) ##remove this
 
-        
-        
         if user_input==1:
             description_res=search_description(new_l)
         elif user_input==2:
             membership_results=filter_by_membership(new_l)
         elif user_input==3:
-            metric=choose_visualization()
+            metric=choose_visualization(new_l)
             country_prepare=pre_visualization(new_l, metric)
             visualization(country_prepare, metric)
 
