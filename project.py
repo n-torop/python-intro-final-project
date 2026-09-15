@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+
 import requests
 import os
 from dotenv import load_dotenv
@@ -7,32 +7,26 @@ import json
 def get_region_user():
     return input("Enter region: ").strip().lower()
 
-# def fetch_data(region): 
-#     load_dotenv()
-#     api_key=os.getenv("COUNTRY_API_KEY")
-#     params ={
-#         "region": region
-#     }
-#     base_url= "https://api.restcountries.com/countries/v5"
-#     headers={"Authorization": f"Bearer {api_key}"}
+def fetch_data(region): 
+    load_dotenv()
+    api_key=os.getenv("COUNTRY_API_KEY")
+    params ={
+        "region": region
+    }
+    base_url= "https://api.restcountries.com/countries/v5"
+    headers={"Authorization": f"Bearer {api_key}"}
     
-#     try: 
-#         response = requests.get(base_url, headers=headers, params=params)
-#         status=response.raise_for_status()
-#         data=response.json()
-#         return data
-#     except requests.exceptions.HTTPError:
-#         print (f'HTTP error occured')
-#     except requests.exceptions.RequestException as e:
-#             print ("Error: Could not reach the server. Check your connection and try again.")
+    try: 
+        response = requests.get(base_url, headers=headers, params=params)
+        status=response.raise_for_status()
+        data=response.json()
+        return data
+    except requests.exceptions.HTTPError:
+        print (f'HTTP error occured')
+    except requests.exceptions.RequestException as e:
+            print ("Error: Could not reach the server. Check your connection and try again.")
 
-
-
-with open ("countries.json", "r") as f:
-    data_json=json.load(f)
-
-
-def process_data(data):
+def parsing(data):
     countries=data["data"]["objects"]
     parsed_data=[]
 
@@ -54,26 +48,19 @@ def process_data(data):
         date=el.get("date", {}).get("start_of_week", {})
         description=el.get ("descriptions", {}).get("short", {})
         government=el.get("government_type", {})
-        languages=el.get("languages", [])
-        lang_list=[]
-
-        # if languages and isinstance (languages, list) and len(languages)>0:
-        #     language=languages[0].get("name", {})
-        #     lang_list=[]
-        for lang in languages:
-            name_lang=lang.get("name", "Unknown")
-            lang_list.append(name_lang)
-        
+        languages=el.get("languages", {})
+        if languages and isinstance (languages, list) and len(languages)>0:
+            language=languages[0].get("name", {})
+            lang_list=[]
+            for lang in languages:
+                name_lang=lang.get("name", "Unknown")
+                lang_list.append(name_lang)
         timezone=el.get("timezones", {})
         all_memberships=el.get("memberships", {})
         selected_membership=[k for k, v in all_memberships.items() if v==True]
         if not selected_membership:
             selected_membership=["No memberships found"]
-        area_km=el.get("area", {}).get("kilometers", 0)
-        if area_km>0 and population>0:
-            population_density=population/area_km
-        else: 
-            population_density=0
+
         parsed_data.append({
             "name_common": name_common, 
             "name_official": name_official, 
@@ -87,9 +74,7 @@ def process_data(data):
             "languages": lang_list, 
             "timezone": timezone, 
             "all_memberships": all_memberships, 
-            "selected_membership": selected_membership,
-            "area_km": area_km, 
-            "population_density": population_density
+            "selected_membership": selected_membership
         })
     return parsed_data
 
@@ -168,124 +153,34 @@ def search_description(list_info):
         print (f"Country: {selected_country}\nDescription: {selected_description} | Population: {selected_population} | Government: {selected_governement}\n")
     return filtered_countries
    
-def choose_visualization(list_info):
-    print ("\nCountries available for comparison: ")
-    for el in list_info:
-        country_name=el.get("name_common", '')
-        print(country_name)
-   
-    print("\nWhat would you like to compare?")
-    print ("1. Population\n2. Area\n3. Population density\n4. Go back")
-    while True:
-        
-        raw=input ("Choose an option (1-4): ").strip()
-        try:
-            choice=int(raw)
-        except ValueError:
-            print (f'"{raw}" is not a valid number.')
-            continue
-
-        if choice==4:
-            print ("Exciting!")
-            break
-        if choice not in (1, 2, 3):
-            print ("Invalid input. Please enter 1, 2, 3 or 4.")
-            continue
-
-        if choice==1:
-            return {
-                "key": "population",
-                "ylabel": "Population (millions)",
-                "title": "Population Comparison by Country"
-            }
-        elif choice==2:
-            return {
-                "key": "area_km",
-                "ylabel": "Area (in km²)",
-                "title": "Area Comparison by Country"
-            }
-        elif choice==3:
-            return {
-                "key": "population_density",
-                "ylabel": "Population Density (people per km²)",
-                "title": "Population Density Comparison by Country"
-            }
-       
-
-def pre_visualization(list_info, metric):
-    print ("\nCompare data for chosen countries")
-    user_choice_list=[]
-    user_pick=input("Pick 4 countries to compare: ").lower()
-    print ("Compiling chart...")
-    user_choice_list=user_pick.split(",")
-    cleaned_choices=[]
-    for country in user_choice_list:
-        cleaned_choices.append(country.strip())
-
-# Jordan, Japan, Cambodia, Armenia
-# Kyrgyzstan, Laos, Lebanon, Macau
-    selected=[]
-    for el in list_info:
-        selected_country=el.get("name_common", '').lower()
-        if selected_country in cleaned_choices:
-            selected.append(el)
-    flattened_list=[]
-    for el in selected: 
-        country_name=el.get("name_common", '')
-        parameter=el.get(metric["key"], '')
-        flattened_list.append({
-            "name_common": country_name, 
-            "value": parameter 
-        })
-    return flattened_list
-    
-
-def visualization(vis_data, metric):
-    labels=[r["name_common"] for r in vis_data]
-    values=[r["value"] for r in vis_data]
-    plt.bar(labels, values)
-    plt.xlabel("Countries")
-    plt.ylabel(metric["ylabel"])
-    plt.title(metric["title"])
-    plt.tight_layout()
-    # plt.savefig("sample_chart.png")
-    plt.show()
-
 
 def main():
     while True:
-        print ("\n=== Country Explorer (by Region) ===\n1. Get general country information\n2. Filter by membership\n3. Compare Countries (Chart)\n4. Quit\n")
+        print ("\n=== Country Explorer (by Region) ===\n1. Get general country information\n2. Filter by membership\n3. Quit\n")
         
-        raw=input ("Choose an option (1-4): ")
+        raw=input ("Choose an option (1-3): ")
         try:
             user_input=int(raw)
         except ValueError:
             print (f'"{raw}" is not a valid number.')
             continue
 
-        if user_input==4:
+        if user_input==3:
             print ("Goodbye!")
             break
-        if user_input not in (1, 2, 3):
-            print ("Invalid input. Please enter 1, 2, 3 or 4.")
+        if user_input not in (1, 2):
+            print ("Invalid input. Please enter 1, 2, or 3.")
             continue
 
         user_region=get_region_user()
-
-        # data=fetch_data(user_region) 
-        # new_l=process_data(data)
-
-        new_l=process_data(data_json) ##remove this
-
+        data=fetch_data(user_region) 
+        new_l=parsing(data)
+        
         if user_input==1:
             description_res=search_description(new_l)
         elif user_input==2:
             membership_results=filter_by_membership(new_l)
-        elif user_input==3:
-            metric=choose_visualization(new_l)
-            country_prepare=pre_visualization(new_l, metric)
-            visualization(country_prepare, metric)
-
-if __name__=="__main__":
-    main()
+        
+         
+main()
 

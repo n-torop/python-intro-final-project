@@ -1,0 +1,21 @@
+.env
+.venv/
+venv/
+
+__pycache__/
+p2.py
+output.csv
+countries.json
+project.py
+cat > .gitignore <<'EOF'
+# Ignore everything
+*
+
+# Allow these files
+!main.py
+!README.md
+!requirements.txt
+
+# Allow this .gitignore
+!.gitignore
+EOF
