@@ -29,11 +29,6 @@ def fetch_data(region):
         return None
 
 
-
-# with open ("countries.json", "r") as f:
-#     data_json=json.load(f)
-
-
 def process_data(data):
     countries=data["data"]["objects"]
     parsed_data=[]
