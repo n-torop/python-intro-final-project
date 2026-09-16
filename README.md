@@ -5,7 +5,7 @@ https://www.loom.com/share/cb3865ef9de249ddb7bbe76d6f354d59
 
 -------------
 
-A command-line tool for exploring countries by region. Fetch country data from the REST Countries API, view general information (description, population, government structure), and filter countries by international memberships (EU, NATO, etc.)
+A command-line tool for exploring countries by region. Fetch country data from the REST Countries API, view general information (description, population, government structure), and filter countries by international memberships (EU, NATO, etc.). Create a chart comparing properties of 2-6 countries (population, area, population density)
 
 _ _ _ _ _ _ _
 
