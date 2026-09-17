@@ -219,7 +219,7 @@ def pre_visualization(list_info, metric):
         cleaned_choices=[]
         for country in user_choice_list:
             cleaned_choices.append(country.strip().lower())
-            
+
         len_list=len(cleaned_choices)
         if not 2<=len_list<=6:
             print(f"Invalid number of countries. {len_list} given. Expected 2-6. Try again.")
@@ -255,6 +255,7 @@ def visualization(vis_data, metric):
     plt.xlabel("Countries")
     plt.ylabel(metric["ylabel"])
     plt.title(metric["title"])
+    plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
     plt.savefig("countries_chart.png")
     plt.show()
