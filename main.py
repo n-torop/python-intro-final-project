@@ -208,24 +208,42 @@ def choose_visualization(list_info):
 def pre_visualization(list_info, metric):
     print ("\nCompare data for chosen countries")
     user_choice_list=[]
-    user_pick=input("Pick 2-6 countries to compare: ").lower()
-    print ("Compiling chart...")
-    user_choice_list=user_pick.split(",")
-    cleaned_choices=[]
-    for country in user_choice_list:
-        cleaned_choices.append(country.strip())
-    selected=[]
+    country_lookup={}
     for el in list_info:
-        selected_country=el.get("name_common", '').lower()
-        if selected_country in cleaned_choices:
-            selected.append(el)
-    flattened_list=[]
-    for el in selected: 
         country_name=el.get("name_common", '')
-        parameter=el.get(metric["key"], '')
+        if country_name:
+            country_lookup[country_name.lower()]=el 
+    while True:
+        user_pick=input("Pick 2-6 countries to compare: ").lower()
+        user_choice_list=user_pick.split(",")
+        cleaned_choices=[]
+        for country in user_choice_list:
+            cleaned_choices.append(country.strip().lower())
+            
+        len_list=len(cleaned_choices)
+        if not 2<=len_list<=6:
+            print(f"Invalid number of countries. {len_list} given. Expected 2-6. Try again.")
+            continue
+
+        invalid=[]
+        for elem in cleaned_choices:
+            if elem not in country_lookup:
+                invalid.append(elem)    
+
+        if invalid:         
+            print (f"Unable to retrieve the following entries: {invalid}.")
+            print ("Please try again.")
+            continue
+        break
+
+    print ("Compiling chart...")
+    flattened_list=[]
+    for country_name in cleaned_choices:
+        country=country_lookup[country_name]
+        param=country.get(metric["key"], 0)
         flattened_list.append({
-            "name_common": country_name, 
-            "value": parameter 
+            "name_common": country["name_common"], 
+            "value": param
         })
     return flattened_list
     
@@ -264,7 +282,7 @@ def main():
 
         data=fetch_data(user_region) 
         new_l=process_data(data)
-
+       
         if user_input==1:
             description_res=search_description(new_l)
         elif user_input==2:
