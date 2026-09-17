@@ -61,7 +61,9 @@ Option 1: Input a region (Europe, Asia, etc.). The program fetches all countries
 Option 2: Prompts for a region and then shows a menu of international organizations. Input numbers separated by spaces. The program matches the countries that are members and prints their names.
 
 ## Visualization (Option A)
-Option 3: Compare Countries (Chart): After picking a region, the user sees output of countries that are available for comparison and a menu with 4 available choices (population, area, population density and return to the main menu). The program handles invalid feedback like wrong number of countries (less than 2 and more than 6) and countries that are not a part of the available countries as well as wrong spelling, etc. The bar chart shows the chosen countries on the horizontal plane, and one of the chozen criteria on the vertical plane. Visual representation allows a user to compare the data easily. 
+Option 3: Compare Countries (Chart): After picking a region, the user sees output of countries that are available for comparison and a menu with 4 available choices (population, area, population density and return to the main menu). 
+The visualization answers the following question: What country from the chosen ones has the biggest/smallest population, area, or population density. The chart allows user to see the visual representation of the answer in the form of bar chart.
+The program handles invalid feedback like wrong number of countries (less than 2 and more than 6) and countries that are not a part of the available countries as well as wrong spelling, etc. 
    
 
 Option 4: Quit
